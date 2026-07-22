@@ -1,0 +1,49 @@
+import Link from "next/link";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+export function SiteHeader() {
+  return (
+    <header className="border-b border-slate-200 bg-white/95">
+      <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-md font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        >
+          <span className="flex size-9 items-center justify-center rounded-lg bg-blue-800 text-sm text-white">
+            UB
+          </span>
+          <span className="hidden sm:inline">UstaBIM Tools</span>
+          <Badge className="hidden md:inline-flex" variant="secondary">
+            Прототип
+          </Badge>
+        </Link>
+
+        <nav aria-label="Основная навигация" className="hidden items-center gap-6 lg:flex">
+          <a
+            href="#features"
+            className="rounded text-sm text-slate-600 outline-none hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-600"
+          >
+            Возможности
+          </a>
+          <a
+            href="#about"
+            className="rounded text-sm text-slate-600 outline-none hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-600"
+          >
+            О платформе
+          </a>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/login">Войти</Link>
+          </Button>
+          <Button asChild size="sm" className="hidden sm:inline-flex">
+            <Link href="/app">Открыть инструменты</Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}

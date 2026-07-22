@@ -1,0 +1,95 @@
+import { expect, test, type Page } from "@playwright/test";
+
+function captureBrowserErrors(page: Page) {
+  const errors: string[] = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  return errors;
+}
+
+test("главная страница показывает четыре будущих инструмента и навигацию", async ({
+  page,
+}) => {
+  const browserErrors = captureBrowserErrors(page);
+  await page.goto("/");
+
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Инженерные задачи в одном рабочем пространстве",
+    }),
+  ).toBeVisible();
+  await expect(page.getByTestId("tool-card")).toHaveCount(4);
+  await expect(page.getByRole("link", { name: "Войти" }).first()).toHaveAttribute(
+    "href",
+    "/login",
+  );
+  await expect(
+    page.getByRole("link", { name: "Открыть инструменты" }).first(),
+  ).toHaveAttribute("href", "/app");
+
+  await page.setViewportSize({ width: 360, height: 800 });
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
+  expect(browserErrors).toEqual([]);
+});
+
+test("страница входа остаётся локальной заглушкой", async ({ page }) => {
+  const browserErrors = captureBrowserErrors(page);
+  const externalAuthRequests: string[] = [];
+  page.on("request", (request) => {
+    if (/supabase|google.*oauth|n8n/i.test(request.url())) {
+      externalAuthRequests.push(request.url());
+    }
+  });
+
+  await page.goto("/login");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Вход в UstaBIM Tools" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
+  await expect(page.getByLabel("Пароль")).toHaveAttribute("type", "password");
+  await expect(page.getByRole("button", { name: "Продолжить с Google" })).toBeVisible();
+
+  await page.getByLabel("Email").fill("engineer@example.com");
+  await page.getByLabel("Пароль").fill("not-a-real-password");
+  await page.getByRole("button", { name: "Войти" }).click();
+
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(
+    page.getByText("Авторизация будет подключена на следующем этапе"),
+  ).toBeVisible();
+  await expect(page.getByLabel("Пароль")).toHaveValue("");
+  expect(externalAuthRequests).toEqual([]);
+  expect(browserErrors).toEqual([]);
+});
+
+test("кабинет показывает обзор и не создаёт проект", async ({ page }) => {
+  const browserErrors = captureBrowserErrors(page);
+  await page.goto("/app");
+
+  await expect(page.getByRole("heading", { name: "Добро пожаловать в UstaBIM Tools" })).toBeVisible();
+  await expect(page.getByTestId("tool-card")).toHaveCount(4);
+  await expect(page.getByRole("heading", { name: "Последние проекты" })).toBeVisible();
+  await expect(page.getByText("Проектов пока нет")).toBeVisible();
+
+  await page.getByRole("button", { name: "Создать проект" }).click();
+
+  await expect(
+    page.getByText("Управление проектами будет добавлено на следующем этапе"),
+  ).toBeVisible();
+  await expect(page.getByText("Проектов пока нет")).toBeVisible();
+
+  await page.setViewportSize({ width: 360, height: 800 });
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
+  expect(browserErrors).toEqual([]);
+});
