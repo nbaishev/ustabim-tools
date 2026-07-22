@@ -1,6 +1,7 @@
 import { FolderOpen } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SupabaseStatusCard } from "@/features/system/supabase-status-card";
 import { plannedTools } from "@/features/tools/tool-catalog";
 import { ToolCard } from "@/features/tools/tool-card";
 
@@ -19,6 +20,8 @@ export default function DashboardPage() {
           не подключены.
         </p>
       </section>
+
+      <SupabaseStatusCard />
 
       <section aria-labelledby="tools-heading" className="mt-10">
         <h2 id="tools-heading" className="text-xl font-semibold text-slate-950">

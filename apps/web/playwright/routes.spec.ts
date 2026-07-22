@@ -76,6 +76,8 @@ test("кабинет показывает обзор и не создаёт пр
   await page.goto("/app");
 
   await expect(page.getByRole("heading", { name: "Добро пожаловать в UstaBIM Tools" })).toBeVisible();
+  await page.getByRole("button", { name: "Проверить" }).click();
+  await expect(page.getByTestId("supabase-status")).toHaveText("Не настроено");
   await expect(page.getByTestId("tool-card")).toHaveCount(4);
   await expect(page.getByRole("heading", { name: "Последние проекты" })).toBeVisible();
   await expect(page.getByText("Проектов пока нет")).toBeVisible();
