@@ -1,8 +1,8 @@
 # UstaBIM Tools
 
-Проект содержит архитектурную документацию, frontend-прототип, Supabase health-check, email/password регистрацию с подтверждением, вход, PKCE-восстановление пароля и read-only профиль Supabase Auth с защищёнными `/app` и `/reset-password`. Общий контекст и границы системы описаны в `README.md` и каталоге `docs/`.
+Проект содержит архитектурную документацию, frontend-прототип, Supabase health-check, email/password регистрацию с подтверждением, вход, PKCE-восстановление пароля, read-only профиль Supabase Auth и первый локальный срез браузерного IFC-просмотрщика с защищёнными `/app` и `/reset-password`. Общий контекст и границы системы описаны в `README.md` и каталоге `docs/`.
 
-До отдельной задачи не создавайте Google OAuth, повторную отправку confirmation email, backend-бизнес-логику, миграции, workflow или CI/CD. Не используйте service role в браузере, не обходите RLS и сохраняйте честный статус UI-заглушек.
+До отдельной задачи не создавайте Google OAuth, повторную отправку confirmation email, загрузку IFC в Storage, дерево/свойства/измерения IFC, backend-бизнес-логику, миграции, workflow или CI/CD. Не используйте service role в браузере, не обходите RLS и сохраняйте честный статус UI-заглушек.
 
 Базовые проверки изменений:
 

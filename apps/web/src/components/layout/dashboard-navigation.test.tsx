@@ -30,6 +30,26 @@ describe("DashboardNavigation", () => {
       "href",
       "/app/profile",
     );
+    expect(screen.getByRole("link", { name: "IFC-модели" })).toHaveAttribute(
+      "href",
+      "/app/ifc",
+    );
+  });
+
+  it("отмечает IFC-просмотрщик как текущий раздел", () => {
+    mocks.pathname = "/app/ifc";
+    render(
+      <>
+        <DashboardNavigation />
+        <DashboardPageLabel />
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "IFC-модели" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByText("IFC-модели", { selector: "p" })).toBeInTheDocument();
   });
 
   it("отмечает профиль и меняет заголовок раздела", () => {

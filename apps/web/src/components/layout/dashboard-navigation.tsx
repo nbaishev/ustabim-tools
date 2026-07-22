@@ -17,7 +17,7 @@ import { cn } from "@/shared/lib/utils";
 const navigation = [
   { label: "Обзор", icon: LayoutDashboard, href: "/app", implemented: true },
   { label: "Проекты", icon: FolderKanban, href: "/app", implemented: false },
-  { label: "IFC-модели", icon: Box, href: "/app", implemented: false },
+  { label: "IFC-модели", icon: Box, href: "/app/ifc", implemented: true },
   { label: "ИИ-чат", icon: Bot, href: "/app", implemented: false },
   { label: "Геология", icon: TestTubeDiagonal, href: "/app", implemented: false },
   { label: "Калькуляторы", icon: Calculator, href: "/app", implemented: false },
@@ -63,9 +63,13 @@ export function DashboardNavigation({ mobile = false }: { mobile?: boolean }) {
 
 export function DashboardPageLabel() {
   const pathname = usePathname();
+  const label = pathname.startsWith("/app/ifc")
+    ? "IFC-модели"
+    : pathname === "/app/profile"
+      ? "Профиль"
+      : "Обзор";
+
   return (
-    <p className="font-semibold text-slate-950">
-      {pathname === "/app/profile" ? "Профиль" : "Обзор"}
-    </p>
+    <p className="font-semibold text-slate-950">{label}</p>
   );
 }

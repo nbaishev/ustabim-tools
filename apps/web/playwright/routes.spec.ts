@@ -13,6 +13,7 @@ function captureBrowserErrors(page: Page) {
 
 test("главная страница показывает четыре будущих инструмента и навигацию", async ({
   page,
+  request,
 }) => {
   const browserErrors = captureBrowserErrors(page);
   await page.goto("/");
@@ -37,6 +38,8 @@ test("главная страница показывает четыре буду
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);
+  expect((await request.get("/ifc-runtime/web-ifc.wasm")).ok()).toBe(true);
+  expect((await request.get("/ifc-runtime/fragments-worker.mjs")).ok()).toBe(true);
   expect(browserErrors).toEqual([]);
 });
 
@@ -174,6 +177,11 @@ test("кабинет перенаправляет пользователя бе�
   await page.goto("/app/profile");
   await expect(page).toHaveURL(
     /\/login\?next=%2Fapp%2Fprofile&reason=not-configured$/,
+  );
+
+  await page.goto("/app/ifc");
+  await expect(page).toHaveURL(
+    /\/login\?next=%2Fapp%2Fifc&reason=not-configured$/,
   );
   expect(browserErrors).toEqual([]);
 });

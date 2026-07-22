@@ -9,6 +9,7 @@ export default defineConfig([
     ".next/**",
     "coverage/**",
     "playwright-report/**",
+    "public/ifc-runtime/**",
     "test-results/**",
   ]),
 ]);

@@ -12,6 +12,7 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+apps/web/public/ifc-runtime/
 
 # Python
 __pycache__/
