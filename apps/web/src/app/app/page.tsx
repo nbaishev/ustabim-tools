@@ -7,7 +7,14 @@ import { ToolCard } from "@/features/tools/tool-card";
 
 import { CreateProjectButton } from "./create-project-button";
 
-export default function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
+  const hasConfirmedEmail = params.reason === "email-confirmed";
+
   return (
     <div className="mx-auto max-w-7xl">
       <section>
@@ -19,6 +26,11 @@ export default function DashboardPage() {
           Это демонстрационный кабинет. Инструменты и пользовательские данные пока
           не подключены.
         </p>
+        {hasConfirmedEmail ? (
+          <p className="mt-5 max-w-2xl rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950">
+            Email подтверждён. Аккаунт готов к работе.
+          </p>
+        ) : null}
       </section>
 
       <SupabaseStatusCard />

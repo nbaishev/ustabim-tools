@@ -2,14 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { createBrowserSupabaseClient } from "@/shared/lib/supabase/client";
 
-const safeSuccessMessage =
-  "Если пользователь с таким email существует, на него отправлена ссылка для восстановления пароля.";
-
 export function ForgotPasswordForm() {
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
 
@@ -30,7 +29,7 @@ export function ForgotPasswordForm() {
         redirectTo: callbackUrl.toString(),
       });
       form.reset();
-      setMessage(safeSuccessMessage);
+      router.replace("/forgot-password/check-email");
     } catch {
       setMessage(
         "Supabase не настроен или временно недоступен. Проверьте конфигурацию проекта.",

@@ -5,7 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForgotPasswordForm } from "./forgot-password-form";
 
 const mocks = vi.hoisted(() => ({
+  replace: vi.fn(),
   resetPasswordForEmail: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mocks.replace }),
 }));
 
 vi.mock("@/shared/lib/supabase/client", () => ({
@@ -33,8 +38,8 @@ describe("ForgotPasswordForm", () => {
         redirectTo: "http://localhost:3000/auth/callback?next=%2Freset-password",
       },
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Если пользователь с таким email существует",
+    expect(mocks.replace).toHaveBeenCalledWith(
+      "/forgot-password/check-email",
     );
     expect(screen.getByLabelText("Email")).toHaveValue("");
   });
@@ -49,9 +54,9 @@ describe("ForgotPasswordForm", () => {
     await user.type(screen.getByLabelText("Email"), "unknown@example.com");
     await user.click(screen.getByRole("button", { name: "Отправить ссылку" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Если пользователь с таким email существует",
+    expect(mocks.replace).toHaveBeenCalledWith(
+      "/forgot-password/check-email",
     );
-    expect(screen.getByRole("status")).not.toHaveTextContent("User not found");
+    expect(screen.queryByText("User not found")).not.toBeInTheDocument();
   });
 });

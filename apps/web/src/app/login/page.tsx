@@ -40,8 +40,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Вход в UstaBIM Tools
             </h1>
             <p className="text-sm leading-6 text-slate-600">
-              Используйте email и пароль существующего пользователя Supabase.
-              Регистрация и Google OAuth пока не реализованы.
+              Используйте email и пароль подтверждённого пользователя. Google
+              OAuth пока не реализован.
             </p>
             {reason === "not-configured" ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
@@ -61,6 +61,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               className="mt-1 block rounded text-center text-sm font-medium text-blue-700 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-blue-600"
             >
               Забыли пароль?
+            </Link>
+            <Link
+              href="/register"
+              className="mt-3 block rounded text-center text-sm font-medium text-blue-700 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-blue-600"
+            >
+              Создать аккаунт
             </Link>
           </CardContent>
         </Card>

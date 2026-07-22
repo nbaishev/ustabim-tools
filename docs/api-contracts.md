@@ -48,10 +48,10 @@
 
 ### `GET /auth/callback`
 
-- **Назначение:** одноразово обменять Supabase PKCE `code` на recovery cookie-сессию.
-- **Параметры:** query `code` и точное `next=/reset-password`; тело и исходная сессия не требуются.
-- **Успех:** `307` redirect на `/reset-password` с защищёнными cookies Supabase.
-- **Ошибка:** `307` redirect на `/forgot-password?error=invalid-link`; техническая причина не раскрывается.
+- **Назначение:** одноразово обменять Supabase PKCE `code` регистрации или восстановления на cookie-сессию.
+- **Параметры:** query `code` и точное `next=/app` для signup либо `next=/reset-password` для recovery; тело и исходная сессия не требуются.
+- **Успех:** `307` redirect на `/app?reason=email-confirmed` или `/reset-password` с защищёнными cookies Supabase.
+- **Ошибка:** `307` redirect на `/register?error=invalid-link` для signup либо `/forgot-password?error=invalid-link` для recovery; техническая причина не раскрывается.
 - **Доступ:** произвольные внешние `next` отклоняются, поэтому endpoint нельзя использовать как open redirect.
 - **Идемпотентность:** code одноразовый; повторное использование приводит к безопасному error redirect.
 

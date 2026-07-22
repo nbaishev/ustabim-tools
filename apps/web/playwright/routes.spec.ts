@@ -68,6 +68,10 @@ test("страница входа безопасно обрабатывает о
     "href",
     "/forgot-password",
   );
+  await expect(page.getByRole("link", { name: "Создать аккаунт" })).toHaveAttribute(
+    "href",
+    "/register",
+  );
 
   await page.getByLabel("Email").fill("engineer@example.com");
   await page.getByLabel("Пароль").fill("not-a-real-password");
@@ -81,6 +85,44 @@ test("страница входа безопасно обрабатывает о
   ).toBeVisible();
   await expect(page.getByLabel("Пароль")).toHaveValue("");
   expect(externalAuthRequests).toEqual([]);
+  expect(browserErrors).toEqual([]);
+});
+
+test("регистрация валидирует пароль без внешнего запроса", async ({ page }) => {
+  const browserErrors = captureBrowserErrors(page);
+  const externalAuthRequests: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).hostname.endsWith(".supabase.co")) {
+      externalAuthRequests.push(request.url());
+    }
+  });
+
+  await page.goto("/register");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Регистрация в UstaBIM Tools" }),
+  ).toBeVisible();
+  await page.getByLabel("Email").fill("engineer@example.com");
+  await page
+    .getByLabel("Пароль", { exact: true })
+    .fill("Strong-password-2026");
+  await page
+    .getByLabel("Повторите пароль", { exact: true })
+    .fill("Different-password-2026");
+  await page.getByRole("button", { name: "Создать аккаунт" }).click();
+
+  await expect(page.getByText("Пароли не совпадают", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Пароль", { exact: true })).toHaveValue("");
+  expect(externalAuthRequests).toEqual([]);
+
+  await page.goto("/auth/callback?next=/app");
+  await expect(page).toHaveURL(/\/register\?error=invalid-link$/);
+  await expect(page.getByText(/Ссылка подтверждения недействительна/)).toBeVisible();
+
+  await page.goto("/register/check-email");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Проверьте почту" }),
+  ).toBeVisible();
   expect(browserErrors).toEqual([]);
 });
 
@@ -98,6 +140,14 @@ test("восстановление пароля не раскрывает дан
   await expect(
     page.getByText(/Supabase не настроен или временно недоступен/),
   ).toBeVisible();
+
+  await page.goto("/forgot-password/check-email");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Проверьте почту" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Отправить ссылку ещё раз" }),
+  ).toHaveAttribute("href", "/forgot-password");
 
   await page.goto("/reset-password");
   await expect(page).toHaveURL(/\/forgot-password\?error=invalid-link$/);
