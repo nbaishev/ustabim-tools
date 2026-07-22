@@ -34,6 +34,10 @@ describe("DashboardNavigation", () => {
       "href",
       "/app/ifc",
     );
+    expect(screen.getByRole("link", { name: "ИИ-чат" })).toHaveAttribute(
+      "href",
+      "/app/chat",
+    );
   });
 
   it("отмечает IFC-просмотрщик как текущий раздел", () => {
@@ -66,5 +70,21 @@ describe("DashboardNavigation", () => {
       "page",
     );
     expect(screen.getByText("Профиль", { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("отмечает frontend чата как текущий раздел", () => {
+    mocks.pathname = "/app/chat";
+    render(
+      <>
+        <DashboardNavigation />
+        <DashboardPageLabel />
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "ИИ-чат" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByText("ИИ-чат", { selector: "p" })).toBeInTheDocument();
   });
 });

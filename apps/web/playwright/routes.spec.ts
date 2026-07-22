@@ -183,5 +183,10 @@ test("кабинет перенаправляет пользователя бе�
   await expect(page).toHaveURL(
     /\/login\?next=%2Fapp%2Fifc&reason=not-configured$/,
   );
+
+  await page.goto("/app/chat");
+  await expect(page).toHaveURL(
+    /\/login\?next=%2Fapp%2Fchat&reason=not-configured$/,
+  );
   expect(browserErrors).toEqual([]);
 });

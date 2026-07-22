@@ -18,7 +18,7 @@ const navigation = [
   { label: "Обзор", icon: LayoutDashboard, href: "/app", implemented: true },
   { label: "Проекты", icon: FolderKanban, href: "/app", implemented: false },
   { label: "IFC-модели", icon: Box, href: "/app/ifc", implemented: true },
-  { label: "ИИ-чат", icon: Bot, href: "/app", implemented: false },
+  { label: "ИИ-чат", icon: Bot, href: "/app/chat", implemented: true },
   { label: "Геология", icon: TestTubeDiagonal, href: "/app", implemented: false },
   { label: "Калькуляторы", icon: Calculator, href: "/app", implemented: false },
   { label: "Профиль", icon: UserRound, href: "/app/profile", implemented: true },
@@ -65,6 +65,8 @@ export function DashboardPageLabel() {
   const pathname = usePathname();
   const label = pathname.startsWith("/app/ifc")
     ? "IFC-модели"
+    : pathname.startsWith("/app/chat")
+      ? "ИИ-чат"
     : pathname === "/app/profile"
       ? "Профиль"
       : "Обзор";

@@ -11,6 +11,7 @@ export type ToolDefinition = {
   description: string;
   status: "planned" | "development" | "available";
   icon: LucideIcon;
+  href?: string;
 };
 
 export const plannedTools: ToolDefinition[] = [
@@ -27,6 +28,7 @@ export const plannedTools: ToolDefinition[] = [
       "Помощь в работе с инженерными данными и проектной документацией.",
     status: "development",
     icon: Bot,
+    href: "/app/chat",
   },
   {
     title: "Анализ геологии",
