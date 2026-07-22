@@ -6,12 +6,11 @@ import {
   LayoutDashboard,
   Settings,
   TestTubeDiagonal,
-  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/features/auth/logout-button";
 import { cn } from "@/shared/lib/utils";
 
 const navigation = [
@@ -24,7 +23,13 @@ const navigation = [
   { label: "Настройки", icon: Settings },
 ];
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  userEmail,
+}: {
+  children: React.ReactNode;
+  userEmail: string | null;
+}) {
   return (
     <div className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-[256px_1fr]">
       <aside className="hidden border-r border-slate-200 bg-slate-950 text-white lg:flex lg:flex-col">
@@ -56,9 +61,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <p className="border-t border-slate-800 p-6 text-xs leading-5 text-slate-400">
-          Интерфейсный прототип
+          Защищённая сессия
           <br />
-          Без подключения к данным
+          Данные проектов ещё не подключены
         </p>
       </aside>
 
@@ -72,11 +77,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <p className="font-semibold text-slate-950">Обзор</p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">Демо</Badge>
-              <Button type="button" variant="outline" size="sm" aria-label="Профиль — демо">
-                <UserRound aria-hidden="true" className="size-4" />
-                <span className="hidden sm:inline">Профиль</span>
-              </Button>
+              <Badge variant="success">Сессия активна</Badge>
+              {userEmail ? (
+                <span className="hidden max-w-48 truncate text-sm text-slate-600 md:inline">
+                  {userEmail}
+                </span>
+              ) : null}
+              <LogoutButton />
             </div>
           </div>
           <nav

@@ -18,8 +18,8 @@ export async function createServerSupabaseClient() {
             cookieStore.set(name, value, options);
           });
         } catch {
-          // Server Components cannot write cookies. A future auth proxy will
-          // handle refresh writes when authentication is implemented.
+          // Server Components cannot write cookies. src/proxy.ts handles
+          // refresh writes before protected routes are rendered.
         }
       },
     },
