@@ -171,5 +171,9 @@ test("кабинет перенаправляет пользователя бе�
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);
+  await page.goto("/app/profile");
+  await expect(page).toHaveURL(
+    /\/login\?next=%2Fapp%2Fprofile&reason=not-configured$/,
+  );
   expect(browserErrors).toEqual([]);
 });

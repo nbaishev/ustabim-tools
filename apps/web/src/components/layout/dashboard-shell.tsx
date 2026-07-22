@@ -1,27 +1,11 @@
-import {
-  Bot,
-  Box,
-  Calculator,
-  FolderKanban,
-  LayoutDashboard,
-  Settings,
-  TestTubeDiagonal,
-} from "lucide-react";
 import Link from "next/link";
 
+import {
+  DashboardNavigation,
+  DashboardPageLabel,
+} from "@/components/layout/dashboard-navigation";
 import { Badge } from "@/components/ui/badge";
 import { LogoutButton } from "@/features/auth/logout-button";
-import { cn } from "@/shared/lib/utils";
-
-const navigation = [
-  { label: "Обзор", icon: LayoutDashboard, active: true },
-  { label: "Проекты", icon: FolderKanban },
-  { label: "IFC-модели", icon: Box },
-  { label: "ИИ-чат", icon: Bot },
-  { label: "Геология", icon: TestTubeDiagonal },
-  { label: "Калькуляторы", icon: Calculator },
-  { label: "Настройки", icon: Settings },
-];
 
 export function DashboardShell({
   children,
@@ -43,22 +27,7 @@ export function DashboardShell({
           UstaBIM Tools
         </Link>
         <nav aria-label="Навигация кабинета" className="flex-1 space-y-1 px-4 py-4">
-          {navigation.map(({ label, icon: Icon, active }) => (
-            <Link
-              key={label}
-              href="/app"
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
-                active
-                  ? "bg-blue-600 font-semibold text-white"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white",
-              )}
-            >
-              <Icon aria-hidden="true" className="size-4" />
-              {label}
-            </Link>
-          ))}
+          <DashboardNavigation />
         </nav>
         <p className="border-t border-slate-800 p-6 text-xs leading-5 text-slate-400">
           Защищённая сессия
@@ -74,7 +43,7 @@ export function DashboardShell({
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
                 Рабочее пространство
               </p>
-              <p className="font-semibold text-slate-950">Обзор</p>
+              <DashboardPageLabel />
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="success">Сессия активна</Badge>
@@ -90,19 +59,7 @@ export function DashboardShell({
             aria-label="Мобильная навигация кабинета"
             className="flex gap-2 overflow-x-auto border-t border-slate-100 px-4 py-2 lg:hidden"
           >
-            {navigation.map(({ label, active }) => (
-              <Link
-                key={label}
-                href="/app"
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-blue-600",
-                  active ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-700",
-                )}
-              >
-                {label}
-              </Link>
-            ))}
+            <DashboardNavigation mobile />
           </nav>
         </header>
         <main className="px-4 py-8 sm:px-6 lg:px-8">{children}</main>
