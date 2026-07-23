@@ -43,7 +43,7 @@ test("главная страница показывает четыре буду
   expect(browserErrors).toEqual([]);
 });
 
-test("страница входа безопасно обрабатывает отсутствие Supabase", async ({ page }) => {
+test("страница входа показывает Google и безопасно обрабатывает отсутствие Supabase", async ({ page }) => {
   const browserErrors = captureBrowserErrors(page);
   const externalAuthRequests: string[] = [];
   page.on("request", (request) => {
@@ -66,7 +66,7 @@ test("страница входа безопасно обрабатывает о
   await expect(page.getByLabel("Пароль")).toHaveAttribute("type", "password");
   await expect(
     page.getByRole("button", { name: "Продолжить с Google" }),
-  ).not.toBeVisible();
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Забыли пароль?" })).toHaveAttribute(
     "href",
     "/forgot-password",
@@ -104,6 +104,9 @@ test("регистрация валидирует пароль без внешн
 
   await expect(
     page.getByRole("heading", { level: 1, name: "Регистрация в UstaBIM Tools" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Продолжить с Google" }),
   ).toBeVisible();
   await page.getByLabel("Email").fill("engineer@example.com");
   await page

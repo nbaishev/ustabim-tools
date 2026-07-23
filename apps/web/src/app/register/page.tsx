@@ -3,6 +3,10 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  AuthMethodDivider,
+  GoogleOAuthButton,
+} from "@/features/auth/google-oauth-button";
 import { RegisterForm } from "@/features/auth/register-form";
 
 type RegisterPageProps = {
@@ -30,8 +34,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               Регистрация в UstaBIM Tools
             </h1>
             <p className="text-sm leading-6 text-slate-600">
-              Создайте аккаунт по email. Доступ откроется только после перехода
-              по одноразовой ссылке из письма.
+              Продолжите через Google или создайте аккаунт по email. Для email
+              доступ откроется после перехода по одноразовой ссылке из письма.
             </p>
             {hasInvalidLink ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
@@ -41,6 +45,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
             ) : null}
           </CardHeader>
           <CardContent>
+            <GoogleOAuthButton />
+            <AuthMethodDivider />
             <RegisterForm />
           </CardContent>
         </Card>

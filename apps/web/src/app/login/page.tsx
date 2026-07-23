@@ -3,6 +3,10 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  AuthMethodDivider,
+  GoogleOAuthButton,
+} from "@/features/auth/google-oauth-button";
 
 import { LoginForm } from "./login-form";
 
@@ -22,6 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const nextPath = safeNextPath(firstValue(params.next));
   const reason = firstValue(params.reason);
+  const authError = firstValue(params.error);
 
   return (
     <main className="grid min-h-screen place-items-center px-4 py-10">
@@ -40,8 +45,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Вход в UstaBIM Tools
             </h1>
             <p className="text-sm leading-6 text-slate-600">
-              Используйте email и пароль подтверждённого пользователя. Google
-              OAuth пока не реализован.
+              Войдите через Google или используйте email и пароль подтверждённого
+              пользователя.
             </p>
             {reason === "not-configured" ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
@@ -53,8 +58,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 Пароль изменён. Войдите с новым паролем.
               </p>
             ) : null}
+            {authError === "oauth" ? (
+              <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                Вход через Google не завершён. Повторите попытку или используйте email.
+              </p>
+            ) : null}
           </CardHeader>
           <CardContent>
+            <GoogleOAuthButton nextPath={nextPath} />
+            <AuthMethodDivider />
             <LoginForm nextPath={nextPath} />
             <Link
               href="/forgot-password"

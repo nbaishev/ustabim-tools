@@ -18,15 +18,36 @@ function signupErrorRedirect(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
+function oauthErrorRedirect(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  url.search = "";
+  url.searchParams.set("error", "oauth");
+  return NextResponse.redirect(url);
+}
+
+function isSafeAppPath(path: string | null): path is string {
+  return Boolean(
+    path &&
+      (path === "/app" || (path.startsWith("/app/") && !path.startsWith("//"))),
+  );
+}
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const next = request.nextUrl.searchParams.get("next");
+  const flow = request.nextUrl.searchParams.get("flow");
 
-  const isRecovery = next === "/reset-password";
-  const isSignup = next === "/app";
-  const errorRedirect = isSignup ? signupErrorRedirect : recoveryErrorRedirect;
+  const isOAuth = flow === "oauth" && isSafeAppPath(next);
+  const isRecovery = flow === null && next === "/reset-password";
+  const isSignup = flow === null && next === "/app";
+  const errorRedirect = isOAuth
+    ? oauthErrorRedirect
+    : isSignup
+      ? signupErrorRedirect
+      : recoveryErrorRedirect;
 
-  if (!code || (!isRecovery && !isSignup)) return errorRedirect(request);
+  if (!code || (!isOAuth && !isRecovery && !isSignup)) return errorRedirect(request);
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -35,7 +56,7 @@ export async function GET(request: NextRequest) {
     if (error) return errorRedirect(request);
 
     const url = request.nextUrl.clone();
-    url.pathname = isSignup ? "/app" : "/reset-password";
+    url.pathname = isOAuth ? next : isSignup ? "/app" : "/reset-password";
     url.search = "";
     if (isSignup) url.searchParams.set("reason", "email-confirmed");
     return NextResponse.redirect(url);
