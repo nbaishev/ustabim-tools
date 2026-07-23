@@ -42,6 +42,10 @@ describe("DashboardNavigation", () => {
       "href",
       "/app/geology",
     );
+    expect(screen.getByRole("link", { name: "Проекты" })).toHaveAttribute(
+      "href",
+      "/app/projects",
+    );
   });
 
   it("отмечает IFC-просмотрщик как текущий раздел", () => {
@@ -106,5 +110,21 @@ describe("DashboardNavigation", () => {
       "page",
     );
     expect(screen.getByText("Геология", { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("отмечает frontend проектов как текущий раздел", () => {
+    mocks.pathname = "/app/projects";
+    render(
+      <>
+        <DashboardNavigation />
+        <DashboardPageLabel />
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Проекты" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByText("Проекты", { selector: "p" })).toBeInTheDocument();
   });
 });

@@ -16,7 +16,12 @@ import { cn } from "@/shared/lib/utils";
 
 const navigation = [
   { label: "Обзор", icon: LayoutDashboard, href: "/app", implemented: true },
-  { label: "Проекты", icon: FolderKanban, href: "/app", implemented: false },
+  {
+    label: "Проекты",
+    icon: FolderKanban,
+    href: "/app/projects",
+    implemented: true,
+  },
   { label: "IFC-модели", icon: Box, href: "/app/ifc", implemented: true },
   { label: "ИИ-чат", icon: Bot, href: "/app/chat", implemented: true },
   {
@@ -70,6 +75,8 @@ export function DashboardPageLabel() {
   const pathname = usePathname();
   const label = pathname.startsWith("/app/ifc")
     ? "IFC-модели"
+    : pathname.startsWith("/app/projects")
+      ? "Проекты"
     : pathname.startsWith("/app/chat")
       ? "ИИ-чат"
       : pathname.startsWith("/app/geology")
