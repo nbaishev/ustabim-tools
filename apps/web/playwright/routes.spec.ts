@@ -188,5 +188,10 @@ test("кабинет перенаправляет пользователя бе�
   await expect(page).toHaveURL(
     /\/login\?next=%2Fapp%2Fchat&reason=not-configured$/,
   );
+
+  await page.goto("/app/geology");
+  await expect(page).toHaveURL(
+    /\/login\?next=%2Fapp%2Fgeology&reason=not-configured$/,
+  );
   expect(browserErrors).toEqual([]);
 });

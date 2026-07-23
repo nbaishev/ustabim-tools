@@ -19,7 +19,12 @@ const navigation = [
   { label: "Проекты", icon: FolderKanban, href: "/app", implemented: false },
   { label: "IFC-модели", icon: Box, href: "/app/ifc", implemented: true },
   { label: "ИИ-чат", icon: Bot, href: "/app/chat", implemented: true },
-  { label: "Геология", icon: TestTubeDiagonal, href: "/app", implemented: false },
+  {
+    label: "Геология",
+    icon: TestTubeDiagonal,
+    href: "/app/geology",
+    implemented: true,
+  },
   { label: "Калькуляторы", icon: Calculator, href: "/app", implemented: false },
   { label: "Профиль", icon: UserRound, href: "/app/profile", implemented: true },
 ];
@@ -67,6 +72,8 @@ export function DashboardPageLabel() {
     ? "IFC-модели"
     : pathname.startsWith("/app/chat")
       ? "ИИ-чат"
+      : pathname.startsWith("/app/geology")
+        ? "Геология"
     : pathname === "/app/profile"
       ? "Профиль"
       : "Обзор";

@@ -36,6 +36,7 @@ export const plannedTools: ToolDefinition[] = [
       "Предварительное извлечение данных из геологических PDF-отчётов.",
     status: "development",
     icon: FileSearch,
+    href: "/app/geology",
   },
   {
     title: "Инженерные калькуляторы",

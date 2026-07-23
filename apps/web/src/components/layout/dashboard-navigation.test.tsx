@@ -38,6 +38,10 @@ describe("DashboardNavigation", () => {
       "href",
       "/app/chat",
     );
+    expect(screen.getByRole("link", { name: "Геология" })).toHaveAttribute(
+      "href",
+      "/app/geology",
+    );
   });
 
   it("отмечает IFC-просмотрщик как текущий раздел", () => {
@@ -86,5 +90,21 @@ describe("DashboardNavigation", () => {
       "page",
     );
     expect(screen.getByText("ИИ-чат", { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("отмечает frontend геологии как текущий раздел", () => {
+    mocks.pathname = "/app/geology";
+    render(
+      <>
+        <DashboardNavigation />
+        <DashboardPageLabel />
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Геология" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByText("Геология", { selector: "p" })).toBeInTheDocument();
   });
 });
