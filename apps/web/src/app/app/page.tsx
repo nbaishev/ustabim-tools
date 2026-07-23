@@ -1,7 +1,6 @@
 import { FolderOpen } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SupabaseStatusCard } from "@/features/system/supabase-status-card";
 import { plannedTools } from "@/features/tools/tool-catalog";
 import { ToolCard } from "@/features/tools/tool-card";
 
@@ -23,8 +22,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           Добро пожаловать в UstaBIM Tools
         </h1>
         <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-          Это демонстрационный кабинет. Инструменты и пользовательские данные пока
-          не подключены.
+          Выберите инструмент или перейдите к работе с проектами.
         </p>
         {hasConfirmedEmail ? (
           <p className="mt-5 max-w-2xl rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950">
@@ -32,8 +30,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           </p>
         ) : null}
       </section>
-
-      <SupabaseStatusCard />
 
       <section aria-labelledby="tools-heading" className="mt-10">
         <h2 id="tools-heading" className="text-xl font-semibold text-slate-950">
@@ -57,8 +53,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </span>
             <h3 className="mt-5 font-semibold text-slate-950">Проектов пока нет</h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-              Управление проектами появится после подключения базы данных и проверки
-              доступа.
+              Создайте проект, чтобы объединить модели, документы и результаты
+              анализа.
             </p>
             <div className="mt-6">
               <CreateProjectButton />

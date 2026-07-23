@@ -40,6 +40,6 @@ describe("GeologyWorkspace", () => {
     render(<GeologyWorkspace />);
 
     await user.click(screen.getByRole("button", { name: "Скважины" }));
-    expect(screen.getByText("Раздел «Скважины» пока пуст")).toBeInTheDocument();
+    expect(screen.getByText("В разделе «Скважины» нет данных")).toBeInTheDocument();
   });
 });

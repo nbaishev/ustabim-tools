@@ -25,3 +25,14 @@ export async function createServerSupabaseClient() {
     },
   });
 }
+
+export async function hasActiveSupabaseSession() {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.getClaims();
+
+    return !error && typeof data?.claims?.sub === "string";
+  } catch {
+    return false;
+  }
+}

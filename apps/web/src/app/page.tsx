@@ -6,11 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { plannedTools } from "@/features/tools/tool-catalog";
 import { ToolCard } from "@/features/tools/tool-card";
+import { hasActiveSupabaseSession } from "@/shared/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const isAuthenticated = await hasActiveSupabaseSession();
+
   return (
     <>
-      <SiteHeader />
+      <SiteHeader isAuthenticated={isAuthenticated} />
       <main>
         <section className="relative isolate overflow-hidden border-b border-slate-200 bg-white">
           <div
@@ -19,12 +22,12 @@ export default function Home() {
           />
           <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.3fr_0.7fr] lg:px-8 lg:py-30">
             <div className="max-w-3xl">
-              <Badge variant="secondary">Прототип инженерной платформы</Badge>
+              <Badge variant="secondary">Инженерная платформа</Badge>
               <h1 className="mt-6 text-4xl font-semibold tracking-[-0.035em] text-balance text-slate-950 sm:text-5xl lg:text-6xl">
                 Инженерные задачи в одном рабочем пространстве
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-                Планируемые инструменты объединят просмотр IFC-моделей,
+                UstaBIM Tools объединяет просмотр IFC-моделей,
                 инженерные калькуляторы, ИИ-ассистента и предварительный анализ
                 геологических отчётов в понятном веб-интерфейсе.
               </p>
@@ -35,9 +38,11 @@ export default function Home() {
                     <ArrowRight aria-hidden="true" className="size-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/login">Войти</Link>
-                </Button>
+                {isAuthenticated ? null : (
+                  <Button asChild size="lg" variant="outline">
+                    <Link href="/login">Войти</Link>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -65,14 +70,14 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700">
-                Планируемые инструменты
+                Инструменты
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
                 Всё необходимое для инженерного проекта
               </h2>
               <p className="mt-4 leading-7 text-slate-600">
-                Карточки показывают направления разработки. Функции пока не
-                подключены и не обрабатывают пользовательские данные.
+                Работайте с BIM-моделями, инженерными документами и проектными
+                данными в едином пространстве.
               </p>
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -88,9 +93,8 @@ export default function Home() {
             <h2 className="text-2xl font-semibold tracking-tight">О платформе</h2>
             <div className="space-y-4 leading-7 text-slate-600">
               <p>
-                UstaBIM Tools проектируется как отдельный сервис для специалистов
-                BIM и строительства. Сейчас доступны регистрация и защищённый
-                вход, но инженерная обработка ещё не реализована.
+                UstaBIM Tools — отдельный сервис для специалистов BIM и
+                строительства с защищённым входом и единым рабочим пространством.
               </p>
               <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-950">
                 Инженерные расчёты и результаты автоматизированного анализа

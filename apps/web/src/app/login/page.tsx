@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import {
   AuthMethodDivider,
   GoogleOAuthButton,
 } from "@/features/auth/google-oauth-button";
+import { hasActiveSupabaseSession } from "@/shared/lib/supabase/server";
 
 import { LoginForm } from "./login-form";
 
@@ -27,6 +29,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath = safeNextPath(firstValue(params.next));
   const reason = firstValue(params.reason);
   const authError = firstValue(params.error);
+
+  if (await hasActiveSupabaseSession()) {
+    redirect(nextPath);
+  }
 
   return (
     <main className="grid min-h-screen place-items-center px-4 py-10">

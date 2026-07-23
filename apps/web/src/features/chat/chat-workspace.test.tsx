@@ -28,7 +28,7 @@ describe("ChatWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "Отправить сообщение" }));
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Сообщение не отправлено",
+      "Не удалось отправить сообщение",
     );
     expect(screen.getByLabelText("Сообщение ассистенту")).toHaveValue("Привет");
   });

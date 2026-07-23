@@ -52,7 +52,7 @@ export function ChatWorkspace() {
     event.preventDefault();
     if (!draft.trim()) return;
     setNotice(
-      "Сообщение не отправлено: серверный AI-контур ещё не подключён. Текст сохранён в поле ввода.",
+      "Не удалось отправить сообщение. Текст сохранён в поле ввода.",
     );
   }
 
@@ -112,7 +112,7 @@ export function ChatWorkspace() {
           </span>
           <p className="mt-3 text-sm font-medium text-slate-700">Диалогов пока нет</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            История появится после подключения API и базы данных.
+            Начните новый чат, чтобы задать вопрос.
           </p>
         </div>
 
@@ -141,10 +141,7 @@ export function ChatWorkspace() {
               <ChevronDown aria-hidden="true" className="size-4 text-slate-500" />
             </button>
           </div>
-          <span className="hidden items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 sm:flex">
-            <Sparkles aria-hidden="true" className="size-3.5" />
-            Интерфейс без AI backend
-          </span>
+          <Sparkles aria-hidden="true" className="size-4 text-blue-600" />
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -156,8 +153,8 @@ export function ChatWorkspace() {
               Чем помочь в инженерной работе?
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-center text-sm leading-6 text-slate-600">
-              Будущий ассистент сможет отвечать по данным проекта, BIM-моделям и
-              документам. Инженерные выводы всегда требуют проверки специалистом.
+              Задавайте вопросы по данным проекта, BIM-моделям и документам.
+              Инженерные выводы всегда требуют проверки специалистом.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -219,8 +216,8 @@ export function ChatWorkspace() {
                 <button
                   type="button"
                   disabled
-                  title="Вложения станут доступны после подключения файлов проектов"
-                  aria-label="Прикрепить файл — пока недоступно"
+                  title="Вложения недоступны"
+                  aria-label="Прикрепить файл — недоступно"
                   className="rounded-full p-2 text-slate-400 disabled:cursor-not-allowed"
                 >
                   <Paperclip aria-hidden="true" className="size-5" />

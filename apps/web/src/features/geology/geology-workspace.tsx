@@ -117,7 +117,7 @@ export function GeologyWorkspace() {
               <div>
                 <CardTitle>Исходный отчёт</CardTitle>
                 <p className="mt-1 text-sm text-slate-500">
-                  На этом этапе файл остаётся в браузере и не загружается в Storage.
+                  Файл обрабатывается локально в браузере и не передаётся на сервер.
                 </p>
               </div>
               <label className="text-sm text-slate-600">
@@ -129,7 +129,7 @@ export function GeologyWorkspace() {
                   aria-label="Проект для геологического отчёта"
                   className="h-9 min-w-52 rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-500"
                 >
-                  <option>Проекты ещё не подключены</option>
+                  <option>Нет доступных проектов</option>
                 </select>
               </label>
             </div>
@@ -143,7 +143,7 @@ export function GeologyWorkspace() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-slate-950">{file.name}</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    PDF · {formatFileSize(file.size)} · готов к будущей загрузке
+                    PDF · {formatFileSize(file.size)} · файл выбран
                   </p>
                 </div>
                 <button
@@ -183,8 +183,8 @@ export function GeologyWorkspace() {
                   Перетащите сюда отчёт ИГИ
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-                  Поддерживается один PDF до 100 МБ. Сканированные страницы будут
-                  распознаваться отдельным OCR-этапом после подключения worker.
+                  Поддерживается один PDF до 100 МБ. Для сканированных страниц
+                  используется отдельный этап OCR.
                 </p>
                 <Button type="button" className="mt-5" onClick={() => inputRef.current?.click()}>
                   Выбрать PDF
@@ -259,7 +259,7 @@ export function GeologyWorkspace() {
           </h2>
           <span className="flex items-center gap-1.5 text-xs text-slate-500">
             <Clock3 aria-hidden="true" className="size-4" />
-            Запуск пока недоступен
+            Для запуска выберите проект
           </span>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -310,7 +310,7 @@ export function GeologyWorkspace() {
               <FileSearch aria-hidden="true" className="size-6" />
             </span>
             <h3 className="mt-4 font-semibold text-slate-900">
-              Раздел «{activeTab}» пока пуст
+              В разделе «{activeTab}» нет данных
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-500">
               Здесь появятся проверяемые результаты после серверной обработки PDF.

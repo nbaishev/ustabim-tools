@@ -26,7 +26,9 @@ describe("ProjectsWorkspace", () => {
     await user.type(screen.getByLabelText("Описание"), "Стадия П");
     await user.click(within(dialog).getByRole("button", { name: "Создать проект" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent("Проект не создан");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Не удалось создать проект",
+    );
     expect(screen.getByLabelText("Название проекта")).toHaveValue(
       "Тестовый объект",
     );

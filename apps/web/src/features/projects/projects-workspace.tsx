@@ -64,7 +64,7 @@ function CreateProjectDialog({ onClose }: { onClose: () => void }) {
     event.preventDefault();
     if (!name.trim()) return;
     setNotice(
-      "Проект не создан: необходимо подключить таблицы проектов, RLS и POST /api/projects. Введённые данные сохранены в форме.",
+      "Не удалось создать проект. Введённые данные сохранены в форме.",
     );
   }
 
@@ -242,7 +242,7 @@ export function ProjectsWorkspace() {
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {hasFilter
-                ? "Измените поисковый запрос или сбросьте фильтры. Реальные данные появятся после подключения API."
+                ? "Измените поисковый запрос или сбросьте фильтры."
                 : "Проект станет общей точкой доступа к файлам, моделям, анализам и работе команды."}
             </p>
             {hasFilter ? (

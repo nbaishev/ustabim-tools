@@ -31,8 +31,6 @@ export function DashboardShell({
         </nav>
         <p className="border-t border-slate-800 p-6 text-xs leading-5 text-slate-400">
           Защищённая сессия
-          <br />
-          Данные проектов ещё не подключены
         </p>
       </aside>
 

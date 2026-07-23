@@ -6,16 +6,15 @@ import { ToolCard } from "./tool-card";
 const card = {
   title: "IFC-просмотрщик",
   description: "Просмотр инженерной модели в браузере.",
-  status: "development" as const,
 };
 
 describe("ToolCard", () => {
-  it("показывает содержание и русский статус", () => {
+  it("показывает название и описание без технического статуса", () => {
     render(<ToolCard {...card} />);
 
     expect(screen.getByText(card.title)).toBeInTheDocument();
     expect(screen.getByText(card.description)).toBeInTheDocument();
-    expect(screen.getByText("В разработке")).toBeInTheDocument();
+    expect(screen.queryByText("В разработке")).not.toBeInTheDocument();
   });
 
   it("создаёт доступную ссылку только при наличии href", () => {

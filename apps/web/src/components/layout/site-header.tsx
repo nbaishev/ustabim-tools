@@ -1,9 +1,8 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function SiteHeader() {
+export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <header className="border-b border-slate-200 bg-white/95">
       <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -15,9 +14,6 @@ export function SiteHeader() {
             UB
           </span>
           <span className="hidden sm:inline">UstaBIM Tools</span>
-          <Badge className="hidden md:inline-flex" variant="secondary">
-            Прототип
-          </Badge>
         </Link>
 
         <nav aria-label="Основная навигация" className="hidden items-center gap-6 lg:flex">
@@ -36,12 +32,20 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" variant="ghost">
-            <Link href="/login">Войти</Link>
-          </Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/app">Открыть инструменты</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button asChild size="sm">
+              <Link href="/app">Личный кабинет</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild size="sm" variant="ghost">
+                <Link href="/login">Войти</Link>
+              </Button>
+              <Button asChild size="sm" className="hidden sm:inline-flex">
+                <Link href="/app">Открыть инструменты</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
