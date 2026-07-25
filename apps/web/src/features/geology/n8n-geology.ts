@@ -58,13 +58,25 @@ export async function createGeologyJob(
 ): Promise<JobCapability> {
   const bytes = Buffer.from(await file.arrayBuffer());
   const digest = createHash("sha256").update(bytes).digest("hex");
-  const body = JSON.stringify({ filename: file.name, mimeType: file.type || "application/pdf", sha256: digest });
+  const mimeType = file.type || "application/pdf";
+  const body = JSON.stringify({ filename: file.name, mimeType, sha256: digest });
+  const formData = new FormData();
+  formData.set("file", file, file.name);
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const nonce = randomUUID();
   let response: Response;
   try {
     response = await fetcher(config.uploadWebhookUrl, {
       method: "POST",
-      headers: { ...signedHeaders(config.internalSecret, body, "application/pdf"), "X-Usta-File-Name": encodeURIComponent(file.name), "X-Usta-Content-SHA256": digest },
-      body: bytes,
+      headers: {
+        "X-Usta-Timestamp": timestamp,
+        "X-Usta-Nonce": nonce,
+        "X-Usta-Signature": signature(config.internalSecret, timestamp, nonce, body),
+        "X-Usta-File-Name": encodeURIComponent(file.name),
+        "X-Usta-File-Mime": mimeType,
+        "X-Usta-Content-SHA256": digest,
+      },
+      body: formData,
       cache: "no-store",
       signal: AbortSignal.timeout(requestTimeoutMs),
     });
