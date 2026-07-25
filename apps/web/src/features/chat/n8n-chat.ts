@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from "node:crypto";
 
 import type { N8nChatConfig } from "@/shared/config/n8n-env";
 
-const requestTimeoutMs = 30_000;
+const requestTimeoutMs = 120_000;
 
 export class N8nChatError extends Error {}
 
