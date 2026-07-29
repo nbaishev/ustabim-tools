@@ -12,7 +12,8 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,21 @@ import { cn } from "@/shared/lib/utils";
 
 const filters = ["Все", "Мои", "Совместные"] as const;
 type ProjectFilter = (typeof filters)[number];
+
+type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  role: "owner" | "member";
+};
+
+type ProjectsResponse = {
+  data?: unknown;
+  error?: { message?: unknown };
+};
 
 const projectSections = [
   {
@@ -55,17 +71,59 @@ const projectSections = [
   },
 ] as const;
 
-function CreateProjectDialog({ onClose }: { onClose: () => void }) {
+function CreateProjectDialog({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (project: Project) => void;
+}) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [notice, setNotice] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim()) return;
-    setNotice(
-      "Не удалось создать проект. Введённые данные сохранены в форме.",
-    );
+    const trimmedName = name.trim();
+    if (!trimmedName || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmedName, description: description.trim() }),
+      });
+      const payload = (await response.json()) as ProjectsResponse;
+      const project = payload.data;
+
+      if (
+        !response.ok ||
+        !project ||
+        typeof project !== "object" ||
+        !("id" in project) ||
+        typeof project.id !== "string"
+      ) {
+        throw new Error(
+          typeof payload.error?.message === "string"
+            ? payload.error.message
+            : "Не удалось создать проект. Попробуйте ещё раз.",
+        );
+      }
+
+      onCreated(project as Project);
+      onClose();
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Не удалось создать проект. Попробуйте ещё раз.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -136,9 +194,9 @@ function CreateProjectDialog({ onClose }: { onClose: () => void }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Отмена
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button type="submit" disabled={!name.trim() || isSubmitting}>
               <Plus aria-hidden="true" className="size-4" />
-              Создать проект
+              {isSubmitting ? "Создаём…" : "Создать проект"}
             </Button>
           </div>
         </form>
@@ -151,12 +209,55 @@ export function ProjectsWorkspace() {
   const [filter, setFilter] = useState<ProjectFilter>("Все");
   const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadNotice, setLoadNotice] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProjects() {
+      try {
+        const response = await fetch("/api/projects");
+        const payload = (await response.json()) as ProjectsResponse;
+        if (!response.ok || !Array.isArray(payload.data)) {
+          throw new Error(
+            typeof payload.error?.message === "string"
+              ? payload.error.message
+              : "Не удалось загрузить проекты.",
+          );
+        }
+        if (active) setProjects(payload.data as Project[]);
+      } catch {
+        if (active) setLoadNotice("Не удалось загрузить проекты. Обновите страницу.");
+      }
+    }
+
+    void loadProjects();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const visibleProjects = projects.filter((project) => {
+    const matchesFilter =
+      filter === "Все" ||
+      (filter === "Мои" && project.role === "owner") ||
+      (filter === "Совместные" && project.role === "member");
+    return matchesFilter && project.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
+  });
 
   const hasFilter = filter !== "Все" || query.trim().length > 0;
+  const myProjects = projects.filter((project) => project.role === "owner").length;
+  const sharedProjects = projects.length - myProjects;
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      {dialogOpen ? <CreateProjectDialog onClose={() => setDialogOpen(false)} /> : null}
+      {dialogOpen ? (
+        <CreateProjectDialog
+          onClose={() => setDialogOpen(false)}
+          onCreated={(project) => setProjects((current) => [project, ...current])}
+        />
+      ) : null}
 
       <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -177,9 +278,9 @@ export function ProjectsWorkspace() {
 
       <section aria-label="Статистика проектов" className="mt-8 grid gap-4 sm:grid-cols-3">
         {[
-          ["Всего проектов", "0"],
-          ["Мои проекты", "0"],
-          ["Совместные", "0"],
+          ["Всего проектов", String(projects.length)],
+          ["Мои проекты", String(myProjects)],
+          ["Совместные", String(sharedProjects)],
         ].map(([label, value]) => (
           <Card key={label}>
             <CardContent className="flex items-center justify-between p-5">
@@ -232,39 +333,70 @@ export function ProjectsWorkspace() {
           </div>
         </div>
 
-        <div className="grid min-h-80 place-items-center px-6 py-12 text-center">
-          <div className="max-w-md">
-            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
-              <FolderKanban aria-hidden="true" className="size-7" />
-            </span>
-            <h3 className="mt-5 text-lg font-semibold text-slate-950">
-              {hasFilter ? "Проекты не найдены" : "Создайте первый проект"}
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {hasFilter
-                ? "Измените поисковый запрос или сбросьте фильтры."
-                : "Проект станет общей точкой доступа к файлам, моделям, анализам и работе команды."}
-            </p>
-            {hasFilter ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-5"
-                onClick={() => {
-                  setQuery("");
-                  setFilter("Все");
-                }}
-              >
-                Сбросить фильтры
-              </Button>
-            ) : (
-              <Button type="button" className="mt-5" onClick={() => setDialogOpen(true)}>
-                <Plus aria-hidden="true" className="size-4" />
-                Создать проект
-              </Button>
-            )}
+        {loadNotice ? (
+          <p role="status" className="mx-5 mt-5 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {loadNotice}
+          </p>
+        ) : null}
+
+        {visibleProjects.length ? (
+          <ul className="divide-y divide-slate-100" aria-label="Список проектов">
+            {visibleProjects.map((project) => (
+              <li key={project.id} className="px-5 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <Link
+                      href={`/app/projects/${project.id}`}
+                      className="font-semibold text-slate-950 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    >
+                      {project.name}
+                    </Link>
+                    {project.description ? (
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{project.description}</p>
+                    ) : null}
+                  </div>
+                  <Badge variant="secondary">
+                    {project.role === "owner" ? "Владелец" : "Участник"}
+                  </Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="grid min-h-80 place-items-center px-6 py-12 text-center">
+            <div className="max-w-md">
+              <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+                <FolderKanban aria-hidden="true" className="size-7" />
+              </span>
+              <h3 className="mt-5 text-lg font-semibold text-slate-950">
+                {hasFilter ? "Проекты не найдены" : "Создайте первый проект"}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {hasFilter
+                  ? "Измените поисковый запрос или сбросьте фильтры."
+                  : "Проект станет общей точкой доступа к файлам, моделям, анализам и работе команды."}
+              </p>
+              {hasFilter ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-5"
+                  onClick={() => {
+                    setQuery("");
+                    setFilter("Все");
+                  }}
+                >
+                  Сбросить фильтры
+                </Button>
+              ) : (
+                <Button type="button" className="mt-5" onClick={() => setDialogOpen(true)}>
+                  <Plus aria-hidden="true" className="size-4" />
+                  Создать проект
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       <section aria-labelledby="project-contents-heading" className="mt-10">

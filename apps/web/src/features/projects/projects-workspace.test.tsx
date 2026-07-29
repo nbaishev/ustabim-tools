@@ -1,10 +1,14 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ProjectsWorkspace } from "./projects-workspace";
 
 describe("ProjectsWorkspace", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("показывает честное пустое состояние и будущие разделы", () => {
     render(<ProjectsWorkspace />);
 
@@ -14,7 +18,24 @@ describe("ProjectsWorkspace", () => {
     expect(screen.getByText("Команда")).toBeInTheDocument();
   });
 
-  it("открывает форму и не имитирует сохранение без API", async () => {
+  it("создаёт проект через API и показывает его в списке", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            id: "project-1",
+            name: "Тестовый объект",
+            description: "Стадия П",
+            ownerId: "user-1",
+            createdAt: "2026-07-30T00:00:00.000Z",
+            updatedAt: "2026-07-30T00:00:00.000Z",
+            role: "owner",
+          },
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
     render(<ProjectsWorkspace />);
 
@@ -26,11 +47,15 @@ describe("ProjectsWorkspace", () => {
     await user.type(screen.getByLabelText("Описание"), "Стадия П");
     await user.click(within(dialog).getByRole("button", { name: "Создать проект" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Не удалось создать проект",
+    expect(await screen.findByText("Тестовый объект")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Тестовый объект" })).toHaveAttribute(
+      "href",
+      "/app/projects/project-1",
     );
-    expect(screen.getByLabelText("Название проекта")).toHaveValue(
-      "Тестовый объект",
+    expect(screen.queryByRole("dialog", { name: "Новый проект" })).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/projects",
+      expect.objectContaining({ method: "POST" }),
     );
   });
 
