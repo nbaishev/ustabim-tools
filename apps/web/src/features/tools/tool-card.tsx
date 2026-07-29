@@ -26,8 +26,8 @@ function ToolCardContent({
     <Card
       data-testid="tool-card"
       className={cn(
-        "h-full transition-colors",
-        linked && "hover:border-blue-300 hover:bg-blue-50/30",
+        "h-full border-slate-200/80 bg-white/80 shadow-sm transition duration-200",
+        linked && "hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-950/10",
       )}
     >
       <CardHeader className="h-full">

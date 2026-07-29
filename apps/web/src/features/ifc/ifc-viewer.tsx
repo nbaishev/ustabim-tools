@@ -10,15 +10,22 @@ import {
 import {
   Box,
   ArrowLeftRight,
+  ChevronLeft,
   ChevronRight,
   FileUp,
   Focus,
   LoaderCircle,
+  Maximize2,
   MousePointer2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   Ruler,
   Scissors,
   Trash2,
   X,
+  Minimize2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -67,6 +74,37 @@ type ViewerRuntime = {
 };
 
 const initialCamera = [12, 12, 12, 0, 0, 0] as const;
+const PANEL_VISIBILITY_STORAGE_KEY = "ustabim-ifc-panel-visibility";
+
+type PanelVisibility = {
+  properties: boolean;
+  tree: boolean;
+};
+
+function getStoredPanelVisibility(): PanelVisibility | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const value = window.localStorage.getItem(PANEL_VISIBILITY_STORAGE_KEY);
+    if (!value) return null;
+
+    const parsed: unknown = JSON.parse(value);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "tree" in parsed &&
+      "properties" in parsed &&
+      typeof parsed.tree === "boolean" &&
+      typeof parsed.properties === "boolean"
+    ) {
+      return { tree: parsed.tree, properties: parsed.properties };
+    }
+  } catch {
+    // Storage may be unavailable or contain an obsolete value.
+  }
+
+  return null;
+}
 
 function EmptyPanel({ children }: { children: ReactNode }) {
   return (
@@ -145,6 +183,30 @@ export function IfcViewer() {
     null,
   );
   const [measurement, setMeasurement] = useState<number | null>(null);
+  const [panelVisibility, setPanelVisibility] = useState<PanelVisibility>(
+    () => getStoredPanelVisibility() ?? { tree: true, properties: true },
+  );
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        PANEL_VISIBILITY_STORAGE_KEY,
+        JSON.stringify(panelVisibility),
+      );
+    } catch {
+      // The viewer stays usable when browser storage is disabled.
+    }
+  }, [panelVisibility]);
+
+  useEffect(() => {
+    const updateFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", updateFullscreenState);
+    return () => document.removeEventListener("fullscreenchange", updateFullscreenState);
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -174,6 +236,7 @@ export function IfcViewer() {
           antialias: true,
           alpha: false,
         });
+        world.renderer.showLogo = false;
         world.camera = new OBC.OrthoPerspectiveCamera(components);
         await world.camera.controls.setLookAt(...initialCamera);
 
@@ -560,9 +623,32 @@ export function IfcViewer() {
   }
 
   const toolDisabled = !isReady || isLoading || !fileName;
+  const gridColumns =
+    panelVisibility.tree && panelVisibility.properties
+      ? "lg:grid-cols-[280px_minmax(0,1fr)_320px]"
+      : panelVisibility.tree
+        ? "lg:grid-cols-[280px_minmax(0,1fr)]"
+        : panelVisibility.properties
+          ? "lg:grid-cols-[minmax(0,1fr)_320px]"
+          : "lg:grid-cols-1";
+
+  const toggleFullscreen = async () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    try {
+      if (document.fullscreenElement === container) {
+        await document.exitFullscreen();
+      } else {
+        await container.requestFullscreen();
+      }
+    } catch {
+      setMessage("Полноэкранный режим недоступен в этом браузере");
+    }
+  };
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-col gap-3 border-b border-slate-800 bg-slate-950 px-4 py-3 text-white xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">
@@ -671,6 +757,48 @@ export function IfcViewer() {
           >
             <Focus className="size-4" /> Вписать
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              setPanelVisibility((visibility) => ({
+                ...visibility,
+                tree: !visibility.tree,
+              }))
+            }
+            className="border-slate-600 bg-slate-900 text-white hover:bg-slate-800"
+            aria-pressed={panelVisibility.tree}
+          >
+            {panelVisibility.tree ? <PanelLeftClose className="size-4" /> : <PanelLeftOpen className="size-4" />}
+            Дерево
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              setPanelVisibility((visibility) => ({
+                ...visibility,
+                properties: !visibility.properties,
+              }))
+            }
+            className="border-slate-600 bg-slate-900 text-white hover:bg-slate-800"
+            aria-pressed={panelVisibility.properties}
+          >
+            {panelVisibility.properties ? <PanelRightClose className="size-4" /> : <PanelRightOpen className="size-4" />}
+            Свойства
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void toggleFullscreen()}
+            className="border-slate-600 bg-slate-900 text-white hover:bg-slate-800"
+          >
+            {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+            {isFullscreen ? "Свернуть" : "На весь экран"}
+          </Button>
           <Button asChild size="sm">
             <label
               aria-disabled={!isReady || isLoading}
@@ -694,12 +822,26 @@ export function IfcViewer() {
         </div>
       </div>
 
-      <div className="grid min-h-[58vh] lg:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <aside className="order-2 min-h-0 border-t border-slate-200 bg-white lg:order-1 lg:border-r lg:border-t-0">
-          <div className="border-b border-slate-200 px-4 py-3">
+      <div className={`grid min-h-[72vh] ${gridColumns}`}>
+        <aside className={`${panelVisibility.tree ? "" : "hidden"} order-2 min-h-0 border-t border-slate-200 bg-white lg:order-1 lg:border-r lg:border-t-0`}>
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Дерево проекта</h2>
+            <button
+              type="button"
+              onClick={() =>
+                setPanelVisibility((visibility) => ({
+                  ...visibility,
+                  tree: false,
+                }))
+              }
+              className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Скрыть дерево проекта"
+              title="Скрыть дерево проекта"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
           </div>
-          <div className="max-h-[58vh] overflow-auto p-2">
+          <div className="max-h-[72vh] overflow-auto p-2">
             {tree ? (
               <ul>
                 <TreeBranch
@@ -724,8 +866,17 @@ export function IfcViewer() {
           ref={containerRef}
           role="application"
           aria-label="3D-сцена IFC"
-          className="relative order-1 h-[58vh] min-h-96 w-full bg-slate-200 lg:order-2"
+          className="relative order-1 h-[72vh] min-h-[32rem] w-full bg-slate-200 lg:order-2"
         >
+          <button
+            type="button"
+            onClick={() => void toggleFullscreen()}
+            className="absolute right-4 top-4 z-20 rounded-md bg-slate-950/85 p-2 text-white shadow-sm transition-colors hover:bg-slate-800"
+            aria-label={isFullscreen ? "Выйти из полноэкранного режима" : "Открыть на весь экран"}
+            title={isFullscreen ? "Выйти из полноэкранного режима" : "На весь экран"}
+          >
+            {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+          </button>
           {!fileName && !isLoading ? (
             <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center p-6 text-center">
               <div className="max-w-sm rounded-2xl border border-slate-700 bg-slate-950/85 p-6 text-white backdrop-blur-sm">
@@ -745,21 +896,37 @@ export function IfcViewer() {
           ) : null}
         </div>
 
-        <aside className="order-3 min-h-0 border-t border-slate-200 bg-white lg:border-l lg:border-t-0">
+        <aside className={`${panelVisibility.properties ? "" : "hidden"} order-3 min-h-0 border-t border-slate-200 bg-white lg:border-l lg:border-t-0`}>
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Свойства</h2>
-            {selected ? (
+            <div className="flex items-center gap-1">
+              {selected ? (
+                <button
+                  type="button"
+                  onClick={() => void runtimeRef.current?.clearSelection()}
+                  className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                  aria-label="Снять выделение"
+                >
+                  <X className="size-4" />
+                </button>
+              ) : null}
               <button
                 type="button"
-                onClick={() => void runtimeRef.current?.clearSelection()}
+                onClick={() =>
+                  setPanelVisibility((visibility) => ({
+                    ...visibility,
+                    properties: false,
+                  }))
+                }
                 className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                aria-label="Снять выделение"
+                aria-label="Скрыть свойства"
+                title="Скрыть свойства"
               >
-                <X className="size-4" />
+                <ChevronRight className="size-4" />
               </button>
-            ) : null}
+            </div>
           </div>
-          <div className="max-h-[58vh] overflow-auto">
+          <div className="max-h-[72vh] overflow-auto">
             {selected ? (
               <div>
                 <div className="border-b border-slate-200 px-4 py-4">

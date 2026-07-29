@@ -11,6 +11,10 @@ describe("SiteHeader", () => {
       "href",
       "/login",
     );
+    expect(screen.getByRole("link", { name: "Создать аккаунт" })).toHaveAttribute(
+      "href",
+      "/register",
+    );
     expect(screen.queryByRole("link", { name: "Личный кабинет" })).not.toBeInTheDocument();
   });
 

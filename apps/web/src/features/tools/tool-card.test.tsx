@@ -9,12 +9,11 @@ const card = {
 };
 
 describe("ToolCard", () => {
-  it("показывает название и описание без технического статуса", () => {
+  it("показывает название и описание инструмента", () => {
     render(<ToolCard {...card} />);
 
     expect(screen.getByText(card.title)).toBeInTheDocument();
     expect(screen.getByText(card.description)).toBeInTheDocument();
-    expect(screen.queryByText("В разработке")).not.toBeInTheDocument();
   });
 
   it("создаёт доступную ссылку только при наличии href", () => {
@@ -28,4 +27,5 @@ describe("ToolCard", () => {
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
+
 });

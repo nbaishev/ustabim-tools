@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
-    <header className="border-b border-slate-200 bg-white/95">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex min-h-18 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link
           href="/"
@@ -18,16 +18,16 @@ export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
 
         <nav aria-label="Основная навигация" className="hidden items-center gap-6 lg:flex">
           <a
-            href="#features"
+            href="#capabilities"
             className="rounded text-sm text-slate-600 outline-none hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-600"
           >
             Возможности
           </a>
           <a
-            href="#about"
+            href="#workflow"
             className="rounded text-sm text-slate-600 outline-none hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-blue-600"
           >
-            О платформе
+            Как это работает
           </a>
         </nav>
 
@@ -42,7 +42,7 @@ export function SiteHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
                 <Link href="/login">Войти</Link>
               </Button>
               <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link href="/app">Открыть инструменты</Link>
+                <Link href="/register">Создать аккаунт</Link>
               </Button>
             </>
           )}

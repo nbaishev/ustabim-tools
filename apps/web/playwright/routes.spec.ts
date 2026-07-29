@@ -11,7 +11,7 @@ function captureBrowserErrors(page: Page) {
   return errors;
 }
 
-test("главная страница показывает четыре будущих инструмента и навигацию", async ({
+test("главная страница ведёт гостя к регистрации и показывает инструменты", async ({
   page,
   request,
 }) => {
@@ -21,7 +21,7 @@ test("главная страница показывает четыре буду
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Инженерные задачи в одном рабочем пространстве",
+      name: "BIM-данные и инженерные задачи — в одном контексте",
     }),
   ).toBeVisible();
   await expect(page.getByTestId("tool-card")).toHaveCount(4);
@@ -30,8 +30,16 @@ test("главная страница показывает четыре буду
     "/login",
   );
   await expect(
-    page.getByRole("link", { name: "Открыть инструменты" }).first(),
-  ).toHaveAttribute("href", "/app");
+    page.getByRole("link", { name: "Создать аккаунт" }).first(),
+  ).toHaveAttribute("href", "/register");
+  await expect(page.getByRole("link", { name: "Войти в аккаунт" })).toHaveAttribute(
+    "href",
+    "/login",
+  );
+  await expect(page.getByRole("link", { name: "Как это работает" })).toHaveAttribute(
+    "href",
+    "#workflow",
+  );
 
   await page.setViewportSize({ width: 360, height: 800 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
