@@ -43,8 +43,8 @@ describe("GeologyWorkspace", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("не соответствует PDF");
   });
 
-  it("не показывает фиктивные структурированные данные", () => {
+  it("не показывает фиктивные структурированные данные до получения отчёта", () => {
     render(<GeologyWorkspace />);
-    expect(screen.getByText(/ИГЭ, скважины, параметры и риски не заполняются фиктивными данными/)).toBeInTheDocument();
+    expect(screen.getByText("Результат появится после обработки")).toBeInTheDocument();
   });
 });

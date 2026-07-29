@@ -6,6 +6,17 @@ const requestTimeoutMs = 120_000;
 
 export type GeologyJobStatus = "queued" | "processing" | "done" | "error";
 
+export type GeologyReport = {
+  summary?: string;
+  ige?: Array<{ code?: string; description?: string; depthFrom?: number | null; depthTo?: number | null }>;
+  boreholes?: Array<{ name?: string; depth?: number | null }>;
+  groundwater?: Array<{ borehole?: string; depth?: number | null; note?: string }>;
+  risks?: Array<{ severity?: string; text?: string }>;
+  sources?: Array<{ page?: number | null; excerpt?: string }>;
+};
+
+export type GeologyJobResult = { status: GeologyJobStatus; report?: GeologyReport | null };
+
 export class N8nGeologyError extends Error {
   constructor(public readonly code: "QUOTA_EXHAUSTED" | "WORKFLOW_ERROR" = "WORKFLOW_ERROR") {
     super(code);
@@ -108,13 +119,14 @@ async function requestJob(
   }
 }
 
-export async function getGeologyJobStatus(jobId: string, jobAccessToken: string, config: N8nGeologyConfig, fetcher: typeof fetch = fetch): Promise<GeologyJobStatus> {
+export async function getGeologyJobStatus(jobId: string, jobAccessToken: string, config: N8nGeologyConfig, fetcher: typeof fetch = fetch): Promise<GeologyJobResult> {
   const response = await requestJob(config.statusWebhookUrl, jobId, jobAccessToken, config, fetcher);
   const payload = await safePayload(response);
   if (!response.ok) throw new N8nGeologyError(readErrorCode(payload));
   const data = typeof payload === "object" && payload !== null && "data" in payload ? payload.data : payload;
   if (typeof data !== "object" || data === null || !("status" in data) || !isStatus(data.status)) throw new N8nGeologyError();
-  return data.status;
+  const report = "report" in data && typeof data.report === "object" && data.report !== null ? data.report as GeologyReport : null;
+  return { status: data.status, report };
 }
 
 export async function downloadGeologyReport(jobId: string, jobAccessToken: string, config: N8nGeologyConfig, fetcher: typeof fetch = fetch): Promise<Response> {

@@ -27,8 +27,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ jobI
   const token = new URL(request.url).searchParams.get("token");
   if (!jobIdPattern.test(jobId) || !token || token.length < 16 || token.length > 512) return errorResponse(400, "VALIDATION_ERROR", "Некорректная ссылка на задачу.");
   try {
-    const status = await getGeologyJobStatus(jobId, token, getN8nGeologyConfig());
-    return NextResponse.json({ data: { status } }, { headers: noStoreHeaders });
+    const job = await getGeologyJobStatus(jobId, token, getN8nGeologyConfig());
+    return NextResponse.json({ data: job }, { headers: noStoreHeaders });
   } catch (error) {
     if (error instanceof N8nGeologyError) return errorResponse(502, "GEOLOGY_UNAVAILABLE", "Не удалось получить статус анализа.");
     return errorResponse(502, "GEOLOGY_UNAVAILABLE", "Не удалось получить статус анализа.");
