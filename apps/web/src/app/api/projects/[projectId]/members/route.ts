@@ -1,0 +1,74 @@
+import { NextResponse } from "next/server";
+
+import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+const noStoreHeaders = { "Cache-Control": "private, no-store" };
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type InvitePayload = { email?: unknown; role?: unknown };
+
+function errorResponse(status: number, message: string) {
+  return NextResponse.json({ error: { message } }, { status, headers: noStoreHeaders });
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ projectId: string }> },
+) {
+  const { projectId } = await params;
+  if (!uuidPattern.test(projectId)) {
+    return errorResponse(400, "Некорректный идентификатор проекта.");
+  }
+
+  let payload: InvitePayload;
+  try {
+    payload = (await request.json()) as InvitePayload;
+  } catch {
+    return errorResponse(400, "Проверьте email и роль участника.");
+  }
+
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    !Object.keys(payload).every((key) => key === "email" || key === "role")
+  ) {
+    return errorResponse(400, "Проверьте email и роль участника.");
+  }
+
+  const email = typeof payload.email === "string" ? payload.email.trim() : "";
+  const role = payload.role;
+  if (
+    !email || email.length > 254 || !emailPattern.test(email) ||
+    (role !== "editor" && role !== "viewer")
+  ) {
+    return errorResponse(400, "Проверьте email и роль участника.");
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: authData, error: authError } = await supabase.auth.getClaims();
+    if (authError || typeof authData?.claims?.sub !== "string") {
+      return errorResponse(401, "Требуется авторизация.");
+    }
+
+    const { data, error } = await supabase.rpc("invite_project_member", {
+      p_project_id: projectId,
+      p_email: email,
+      p_role: role,
+    });
+    const member = Array.isArray(data) ? data[0] : null;
+    if (error || !member || typeof member !== "object") {
+      return errorResponse(
+        400,
+        "Не удалось добавить участника. Убедитесь, что он зарегистрирован и подтвердил email.",
+      );
+    }
+
+    return NextResponse.json({ data: { role } }, { status: 201, headers: noStoreHeaders });
+  } catch {
+    return errorResponse(500, "Не удалось добавить участника. Попробуйте ещё раз.");
+  }
+}

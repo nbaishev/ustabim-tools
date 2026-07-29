@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InviteProjectMemberButton } from "@/features/projects/invite-project-member-button";
 import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -53,11 +54,14 @@ export default async function ProjectPage({
       </Button>
 
       <section className="mt-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="secondary">Проект</Badge>
-          <Badge variant={isOwner ? "success" : "secondary"}>
-            {isOwner ? "Владелец" : "Участник"}
-          </Badge>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant="secondary">Проект</Badge>
+            <Badge variant={isOwner ? "success" : "secondary"}>
+              {isOwner ? "Владелец" : "Участник"}
+            </Badge>
+          </div>
+          {isOwner ? <InviteProjectMemberButton projectId={project.id} /> : null}
         </div>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           {project.name}

@@ -13,6 +13,24 @@ function errorResponse(status: number, message: string) {
   return NextResponse.json({ error: { message } }, { status, headers: noStoreHeaders });
 }
 
+function projectWriteError(error: { code?: string } | null) {
+  if (error?.code === "42P01") {
+    return errorResponse(
+      503,
+      "Хранилище проектов ещё не настроено. Примените миграции Supabase.",
+    );
+  }
+
+  if (error?.code === "42501") {
+    return errorResponse(
+      503,
+      "Нет доступа к хранилищу проектов. Проверьте RLS и права роли authenticated.",
+    );
+  }
+
+  return errorResponse(500, "Не удалось создать проект. Попробуйте ещё раз.");
+}
+
 function asProject(
   row: {
     id: string;
@@ -109,9 +127,7 @@ export async function POST(request: Request) {
       .select("id, name, description, owner_id, created_at, updated_at")
       .single();
 
-    if (error || !data) {
-      return errorResponse(500, "Не удалось создать проект. Попробуйте ещё раз.");
-    }
+    if (error || !data) return projectWriteError(error);
 
     return NextResponse.json(
       { data: asProject(data) },

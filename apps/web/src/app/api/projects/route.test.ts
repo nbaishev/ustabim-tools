@@ -75,6 +75,21 @@ describe("/api/projects", () => {
     });
   });
 
+  it("подсказывает применить миграции, если таблицы проектов отсутствуют", async () => {
+    const single = vi.fn().mockResolvedValue({ data: null, error: { code: "42P01" } });
+    const select = vi.fn().mockReturnValue({ single });
+    mocks.insert.mockReturnValue({ select });
+
+    const response = await POST(request({ name: "Школа" }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        message: "Хранилище проектов ещё не настроено. Примените миграции Supabase.",
+      },
+    });
+  });
+
   it("отдаёт владельца и доступный совместный проект с безопасным кешированием", async () => {
     const order = vi.fn().mockResolvedValue({
       data: [projectRow(), { ...projectRow(), id: "member-project", owner_id: "other-user" }],
