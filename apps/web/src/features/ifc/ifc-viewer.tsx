@@ -643,7 +643,7 @@ export function IfcViewer({ projectId, modelId }: { projectId?: string; modelId?
   }
 
   useEffect(() => {
-    if (!projectId || !modelId || !isReady || isLoading || loadedRemoteModel.current === modelId) return;
+    if (!projectId || !modelId || !isReady || loadedRemoteModel.current === modelId) return;
     if (!runtimeRef.current) return;
     const projectRuntime = runtimeRef.current as ViewerRuntime;
     let cancelled = false;
@@ -685,7 +685,7 @@ export function IfcViewer({ projectId, modelId }: { projectId?: string; modelId?
     }
     void loadProjectModel();
     return () => { cancelled = true; };
-  }, [isLoading, isReady, modelId, projectId]);
+  }, [isReady, modelId, projectId]);
 
   const toolDisabled = !isReady || isLoading || !fileName;
   const gridColumns =
