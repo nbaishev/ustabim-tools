@@ -30,7 +30,12 @@ const navigation = [
     href: "/app/geology",
     implemented: true,
   },
-  { label: "Калькуляторы", icon: Calculator, href: "/app", implemented: false },
+  {
+    label: "Калькуляторы",
+    icon: Calculator,
+    href: "/app/calculators",
+    implemented: true,
+  },
   { label: "Профиль", icon: UserRound, href: "/app/profile", implemented: true },
 ];
 
@@ -81,6 +86,8 @@ export function DashboardPageLabel() {
       ? "ИИ-чат"
       : pathname.startsWith("/app/geology")
         ? "Геология"
+        : pathname.startsWith("/app/calculators")
+          ? "Калькуляторы"
     : pathname === "/app/profile"
       ? "Профиль"
       : "Обзор";

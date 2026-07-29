@@ -46,6 +46,10 @@ describe("DashboardNavigation", () => {
       "href",
       "/app/projects",
     );
+    expect(screen.getByRole("link", { name: "Калькуляторы" })).toHaveAttribute(
+      "href",
+      "/app/calculators",
+    );
   });
 
   it("отмечает IFC-просмотрщик как текущий раздел", () => {
@@ -126,5 +130,21 @@ describe("DashboardNavigation", () => {
       "page",
     );
     expect(screen.getByText("Проекты", { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("отмечает калькуляторы и меняет заголовок раздела", () => {
+    mocks.pathname = "/app/calculators";
+    render(
+      <>
+        <DashboardNavigation />
+        <DashboardPageLabel />
+      </>,
+    );
+
+    expect(screen.getByRole("link", { name: "Калькуляторы" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByText("Калькуляторы", { selector: "p" })).toBeInTheDocument();
   });
 });

@@ -28,4 +28,10 @@ describe("ToolCard", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
+  it("открывает калькуляторы с карточки обзора", () => {
+    render(<ToolCard title="Инженерные калькуляторы" description="Проверочные схемы." href="/app/calculators" />);
+
+    expect(screen.getByRole("link", { name: /Инженерные калькуляторы: открыть инструмент/i })).toHaveAttribute("href", "/app/calculators");
+  });
+
 });

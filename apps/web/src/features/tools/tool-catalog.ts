@@ -39,5 +39,6 @@ export const plannedTools: ToolDefinition[] = [
     description:
       "Версионированные расчётные инструменты с понятными исходными данными.",
     icon: Calculator,
+    href: "/app/calculators",
   },
 ];
