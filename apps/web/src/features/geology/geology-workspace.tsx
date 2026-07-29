@@ -13,6 +13,23 @@ import { cn } from "@/shared/lib/utils";
 type JobCapability = { jobId: string; jobAccessToken: string };
 const storageKey = "ustabim-geology-mvp-job";
 
+type ApiPayload = { data?: { status?: GeologyJobStatus; report?: GeologyReport | null; jobId?: string; jobAccessToken?: string }; error?: { message?: string } };
+
+async function readApiPayload(response: Response): Promise<ApiPayload> {
+  const contentType = response.headers.get("content-type")?.toLowerCase() || "";
+  if (contentType.includes("application/json")) {
+    try { return await response.json() as ApiPayload; } catch { return { error: { message: "Сервер вернул некорректный JSON-ответ. Попробуйте ещё раз." } }; }
+  }
+  const text = await response.text().catch(() => "");
+  let parsed: ApiPayload | null = null;
+  try { parsed = JSON.parse(text) as ApiPayload; } catch { parsed = null; }
+  if (parsed) return parsed;
+  if (response.status === 413 || /request entity too large/i.test(text)) {
+    return { error: { message: "PDF слишком большой для лимита загрузки текущего сервера. Уменьшите файл или увеличьте лимит reverse proxy." } };
+  }
+  return { error: { message: "Сервер вернул ответ в неподдерживаемом формате. Попробуйте ещё раз." } };
+}
+
 const statusCopy: Record<GeologyJobStatus, string> = {
   queued: "Задача ожидает запуска",
   processing: "Отчёт анализируется",
@@ -110,7 +127,7 @@ export function GeologyWorkspace() {
     const poll = async () => {
       try {
         const response = await fetch(`/api/geology/jobs/${encodeURIComponent(job.jobId)}?token=${encodeURIComponent(job.jobAccessToken)}`, { cache: "no-store" });
-        const payload = await response.json() as { data?: { status?: GeologyJobStatus; report?: GeologyReport | null }; error?: { message?: string } };
+        const payload = await readApiPayload(response);
         if (!response.ok || !payload.data?.status) throw new Error(payload.error?.message || "Не удалось получить статус анализа.");
         if (!stopped) { setStatus(payload.data.status); setReport(payload.data.report || null); }
       } catch (cause) { if (!stopped) setError(cause instanceof Error ? cause.message : "Не удалось получить статус анализа."); }
@@ -133,7 +150,7 @@ export function GeologyWorkspace() {
     try {
       const formData = new FormData(); formData.set("file", file);
       const response = await fetch("/api/geology/jobs", { method: "POST", body: formData });
-      const payload = await response.json() as { data?: JobCapability & { status?: GeologyJobStatus }; error?: { message?: string } };
+      const payload = await readApiPayload(response);
       if (!response.ok || !payload.data?.jobId || !payload.data.jobAccessToken) throw new Error(payload.error?.message || "Не удалось запустить анализ.");
       const capability = { jobId: payload.data.jobId, jobAccessToken: payload.data.jobAccessToken };
       sessionStorage.setItem(storageKey, JSON.stringify(capability));

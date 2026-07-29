@@ -45,6 +45,18 @@ describe("GeologyWorkspace", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("не соответствует PDF");
   });
 
+  it("показывает понятную ошибку, когда сервер отклоняет большой запрос текстовым ответом", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response("Request Entity Too Large", { status: 413, headers: { "content-type": "text/plain" } })));
+    render(<GeologyWorkspace />);
+
+    const input = screen.getByLabelText("Выбрать PDF", { selector: "input" });
+    await user.upload(input, new File(["report"], "geology.pdf", { type: "application/pdf" }));
+    await user.click(screen.getByRole("button", { name: "Начать анализ" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("PDF слишком большой для лимита загрузки текущего сервера");
+  });
+
   it("не показывает фиктивные структурированные данные до получения отчёта", () => {
     render(<GeologyWorkspace />);
     expect(screen.getByText("Результат появится после обработки")).toBeInTheDocument();
