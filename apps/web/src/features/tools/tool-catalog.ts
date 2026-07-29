@@ -10,7 +10,7 @@ export type ToolDefinition = {
   title: string;
   description: string;
   icon: LucideIcon;
-  href?: string;
+  href: string;
 };
 
 export const plannedTools: ToolDefinition[] = [
@@ -19,6 +19,7 @@ export const plannedTools: ToolDefinition[] = [
     description:
       "Просмотр структуры, свойств и геометрии BIM-моделей прямо в браузере.",
     icon: Box,
+    href: "/app/ifc",
   },
   {
     title: "ИИ-ассистент",

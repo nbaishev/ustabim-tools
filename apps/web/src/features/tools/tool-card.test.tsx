@@ -16,16 +16,12 @@ describe("ToolCard", () => {
     expect(screen.getByText(card.description)).toBeInTheDocument();
   });
 
-  it("создаёт доступную ссылку только при наличии href", () => {
-    const { rerender } = render(<ToolCard {...card} href="/app" />);
+  it("создаёт доступную ссылку при наличии href", () => {
+    render(<ToolCard {...card} href="/app" />);
 
     expect(
       screen.getByRole("link", { name: /IFC-просмотрщик: открыть инструмент/i }),
     ).toHaveAttribute("href", "/app");
-
-    rerender(<ToolCard {...card} />);
-
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("открывает калькуляторы с карточки обзора", () => {
