@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteProjectMemberButton } from "@/features/projects/invite-project-member-button";
+import { ProjectIfcModels } from "@/features/ifc/project-ifc-models";
 import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,13 @@ export default async function ProjectPage({
   if (error || !project) notFound();
 
   const isOwner = project.owner_id === userId;
+  const { data: membership } = await supabase
+    .from("project_members")
+    .select("role")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  const canWriteIfc = isOwner || membership?.role === "editor";
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -111,6 +119,7 @@ export default async function ProjectPage({
           </div>
         </CardContent>
       </Card>
+      <ProjectIfcModels projectId={project.id} canWrite={canWriteIfc} userId={userId} />
     </div>
   );
 }

@@ -168,7 +168,7 @@ function TreeBranch({
   );
 }
 
-export function IfcViewer() {
+export function IfcViewer({ projectId, modelId }: { projectId?: string; modelId?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const runtimeRef = useRef<ViewerRuntime | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -190,6 +190,7 @@ export function IfcViewer() {
   const [hasRestoredPanelVisibility, setHasRestoredPanelVisibility] =
     useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const loadedRemoteModel = useRef<string | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -641,6 +642,51 @@ export function IfcViewer() {
     }
   }
 
+  useEffect(() => {
+    if (!projectId || !modelId || !isReady || isLoading || loadedRemoteModel.current === modelId) return;
+    if (!runtimeRef.current) return;
+    const projectRuntime = runtimeRef.current as ViewerRuntime;
+    let cancelled = false;
+    loadedRemoteModel.current = modelId;
+
+    async function loadProjectModel() {
+      setError("");
+      setIsLoading(true);
+      setMessage("Получение защищённой IFC-модели…");
+      try {
+        const response = await fetch(`/api/projects/${projectId}/ifc-models/${modelId}/download`, { cache: "no-store" });
+        const payload = (await response.json()) as { data?: { downloadUrl?: unknown; fileName?: unknown }; error?: { message?: unknown } };
+        if (!response.ok || typeof payload.data?.downloadUrl !== "string" || typeof payload.data.fileName !== "string") {
+          throw new Error(typeof payload.error?.message === "string" ? payload.error.message : "Не удалось открыть IFC-модель.");
+        }
+        const fileResponse = await fetch(payload.data.downloadUrl, { cache: "no-store" });
+        if (!fileResponse.ok) throw new Error("Временная ссылка IFC-модели больше недоступна.");
+        const buffer = await fileResponse.arrayBuffer();
+        if (cancelled) return;
+        const file = new File([buffer], payload.data.fileName, { type: "application/octet-stream" });
+        const metadataError = validateIfcFileMetadata(file);
+        if (metadataError || !hasIfcStepHeader(buffer.slice(0, 256))) throw new Error(metadataError ?? "invalid-ifc-header");
+        setFileName(file.name);
+        setTool("select");
+        projectRuntime.setTool("select");
+        await projectRuntime.load(new Uint8Array(buffer), file.name, (progress) => {
+          if (!cancelled) setMessage(`Преобразование модели: ${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`);
+        });
+        if (!cancelled) setMessage("Модель загружена. Выберите элемент в сцене или дереве");
+      } catch (loadError) {
+        if (!cancelled) {
+          setFileName(null);
+          setError(loadError instanceof Error ? loadError.message : "Не удалось открыть IFC-модель.");
+          setMessage("Модель проекта недоступна");
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    void loadProjectModel();
+    return () => { cancelled = true; };
+  }, [isLoading, isReady, modelId, projectId]);
+
   const toolDisabled = !isReady || isLoading || !fileName;
   const gridColumns =
     panelVisibility.tree && panelVisibility.properties
@@ -818,7 +864,7 @@ export function IfcViewer() {
             {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
             {isFullscreen ? "Свернуть" : "На весь экран"}
           </Button>
-          <Button asChild size="sm">
+          {!projectId || !modelId ? <Button asChild size="sm">
             <label
               aria-disabled={!isReady || isLoading}
               className={!isReady || isLoading ? "pointer-events-none opacity-60" : ""}
@@ -837,7 +883,7 @@ export function IfcViewer() {
                 onChange={handleFileChange}
               />
             </label>
-          </Button>
+          </Button> : null}
         </div>
       </div>
 
