@@ -75,6 +75,7 @@ type ViewerRuntime = {
 
 const initialCamera = [12, 12, 12, 0, 0, 0] as const;
 const PANEL_VISIBILITY_STORAGE_KEY = "ustabim-ifc-panel-visibility";
+const defaultPanelVisibility = { tree: true, properties: true };
 
 type PanelVisibility = {
   properties: boolean;
@@ -184,11 +185,29 @@ export function IfcViewer() {
   );
   const [measurement, setMeasurement] = useState<number | null>(null);
   const [panelVisibility, setPanelVisibility] = useState<PanelVisibility>(
-    () => getStoredPanelVisibility() ?? { tree: true, properties: true },
+    defaultPanelVisibility,
   );
+  const [hasRestoredPanelVisibility, setHasRestoredPanelVisibility] =
+    useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const storedPanelVisibility = getStoredPanelVisibility();
+
+      if (storedPanelVisibility) {
+        setPanelVisibility(storedPanelVisibility);
+      }
+
+      setHasRestoredPanelVisibility(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestoredPanelVisibility) return;
+
     try {
       window.localStorage.setItem(
         PANEL_VISIBILITY_STORAGE_KEY,
@@ -197,7 +216,7 @@ export function IfcViewer() {
     } catch {
       // The viewer stays usable when browser storage is disabled.
     }
-  }, [panelVisibility]);
+  }, [hasRestoredPanelVisibility, panelVisibility]);
 
   useEffect(() => {
     const updateFullscreenState = () => {
