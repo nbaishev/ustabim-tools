@@ -14,6 +14,27 @@ function errorResponse(status: number, message: string) {
   return NextResponse.json({ error: { message } }, { status, headers: noStoreHeaders });
 }
 
+function inviteError(error: { code?: string } | null) {
+  if (error?.code === "PGRST202" || error?.code === "42883") {
+    return errorResponse(
+      503,
+      "Приглашения ещё не настроены. Примените миграции Supabase для участников проекта.",
+    );
+  }
+
+  if (error?.code === "42501") {
+    return errorResponse(
+      503,
+      "Нет доступа к участникам проекта. Проверьте миграции Supabase и RLS-права.",
+    );
+  }
+
+  return errorResponse(
+    400,
+    "Не удалось добавить участника. Проверьте email и права владельца проекта.",
+  );
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ projectId: string }> },
@@ -60,12 +81,7 @@ export async function POST(
       p_role: role,
     });
     const member = Array.isArray(data) ? data[0] : null;
-    if (error || !member || typeof member !== "object") {
-      return errorResponse(
-        400,
-        "Не удалось добавить участника. Убедитесь, что он зарегистрирован и подтвердил email.",
-      );
-    }
+    if (error || !member || typeof member !== "object") return inviteError(error);
 
     return NextResponse.json({ data: { role } }, { status: 201, headers: noStoreHeaders });
   } catch {

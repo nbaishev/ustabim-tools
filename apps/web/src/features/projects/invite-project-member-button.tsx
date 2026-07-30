@@ -61,7 +61,7 @@ export function InviteProjectMemberButton({ projectId }: { projectId: string }) 
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
               <div>
                 <h2 id="invite-member-title" className="text-lg font-semibold text-slate-950">Добавить участника</h2>
-                <p className="mt-1 text-sm text-slate-500">Пользователь должен быть зарегистрирован и подтвердить email.</p>
+                <p className="mt-1 text-sm text-slate-500">Пользователь должен быть зарегистрирован с email, в том числе через Google.</p>
               </div>
               <button type="button" aria-label="Закрыть форму добавления участника" onClick={() => setDialogOpen(false)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950">
                 <X aria-hidden="true" className="size-5" />

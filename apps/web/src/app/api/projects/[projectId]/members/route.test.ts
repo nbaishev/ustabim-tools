@@ -56,7 +56,21 @@ describe("POST /api/projects/[projectId]/members", () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
-      error: { message: "Не удалось добавить участника. Убедитесь, что он зарегистрирован и подтвердил email." },
+      error: { message: "Не удалось добавить участника. Проверьте email и права владельца проекта." },
+    });
+  });
+
+  it("сообщает о неприменённой миграции приглашений", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "PGRST202" } });
+    const response = await POST(request({ email: "member@example.com", role: "viewer" }), {
+      params: Promise.resolve({ projectId }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        message: "Приглашения ещё не настроены. Примените миграции Supabase для участников проекта.",
+      },
     });
   });
 });
