@@ -48,15 +48,29 @@ describe("POST /api/projects/[projectId]/members", () => {
     });
   });
 
-  it("не раскрывает существование пользователей и доступ к проекту", async () => {
-    mocks.rpc.mockResolvedValue({ data: null, error: { code: "P0001" } });
+  it("объясняет отсутствие пользователя без раскрытия доступа к проекту", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "P0002" } });
     const response = await POST(request({ email: "member@example.com", role: "viewer" }), {
       params: Promise.resolve({ projectId }),
     });
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({
-      error: { message: "Не удалось добавить участника. Проверьте email и права владельца проекта." },
+      error: { message: "Пользователь с этим email не найден или вы пытаетесь добавить владельца проекта." },
+    });
+  });
+
+  it("подсказывает обновить уже применённую предыдущую миграцию", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "P0001" } });
+    const response = await POST(request({ email: "member@example.com", role: "viewer" }), {
+      params: Promise.resolve({ projectId }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        message: "База данных использует предыдущую версию приглашений. Примените миграции участников проекта.",
+      },
     });
   });
 

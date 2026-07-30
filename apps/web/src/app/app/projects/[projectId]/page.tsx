@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteProjectMemberButton } from "@/features/projects/invite-project-member-button";
 import { ProjectIfcModels } from "@/features/ifc/project-ifc-models";
+import { ProjectMembersCard } from "@/features/projects/project-members-card";
 import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -119,6 +120,7 @@ export default async function ProjectPage({
           </div>
         </CardContent>
       </Card>
+      {isOwner ? <ProjectMembersCard projectId={project.id} /> : null}
       <ProjectIfcModels projectId={project.id} canWrite={canWriteIfc} userId={userId} />
     </div>
   );

@@ -29,10 +29,35 @@ function inviteError(error: { code?: string } | null) {
     );
   }
 
+  if (error?.code === "P0001") {
+    return errorResponse(
+      503,
+      "База данных использует предыдущую версию приглашений. Примените миграции участников проекта.",
+    );
+  }
+
   return errorResponse(
     400,
-    "Не удалось добавить участника. Проверьте email и права владельца проекта.",
+    "Пользователь с этим email не найден или вы пытаетесь добавить владельца проекта.",
   );
+}
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ projectId: string }> },
+) {
+  const { projectId } = await params;
+  if (!uuidPattern.test(projectId)) return errorResponse(400, "Некорректный идентификатор проекта.");
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: authData, error: authError } = await supabase.auth.getClaims();
+    if (authError || typeof authData?.claims?.sub !== "string") return errorResponse(401, "Требуется авторизация.");
+    const { data, error } = await supabase.rpc("list_project_members", { p_project_id: projectId });
+    if (error || !Array.isArray(data)) return errorResponse(400, "Не удалось загрузить участников проекта.");
+    return NextResponse.json({ data }, { headers: noStoreHeaders });
+  } catch {
+    return errorResponse(500, "Не удалось загрузить участников проекта.");
+  }
 }
 
 export async function POST(
