@@ -42,6 +42,19 @@ function inviteError(error: { code?: string } | null) {
   );
 }
 
+function listError(error: { code?: string } | null) {
+  if (error?.code === "PGRST202" || error?.code === "42883") {
+    return errorResponse(
+      503,
+      "Список участников ещё не настроен. Примените миграцию 00006_manage_project_members.sql.",
+    );
+  }
+  if (error?.code === "42501") {
+    return errorResponse(503, "Нет доступа к участникам проекта. Проверьте миграции Supabase и RLS-права.");
+  }
+  return errorResponse(400, "Не удалось загрузить участников проекта.");
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ projectId: string }> },
@@ -53,7 +66,7 @@ export async function GET(
     const { data: authData, error: authError } = await supabase.auth.getClaims();
     if (authError || typeof authData?.claims?.sub !== "string") return errorResponse(401, "Требуется авторизация.");
     const { data, error } = await supabase.rpc("list_project_members", { p_project_id: projectId });
-    if (error || !Array.isArray(data)) return errorResponse(400, "Не удалось загрузить участников проекта.");
+    if (error || !Array.isArray(data)) return listError(error);
     return NextResponse.json({ data }, { headers: noStoreHeaders });
   } catch {
     return errorResponse(500, "Не удалось загрузить участников проекта.");

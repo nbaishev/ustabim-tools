@@ -3,7 +3,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { POST } from "./route";
+import { GET, POST } from "./route";
 
 const mocks = vi.hoisted(() => ({ getClaims: vi.fn(), rpc: vi.fn() }));
 
@@ -85,6 +85,18 @@ describe("POST /api/projects/[projectId]/members", () => {
       error: {
         message: "Приглашения ещё не настроены. Примените миграции Supabase для участников проекта.",
       },
+    });
+  });
+
+  it("сообщает о неприменённой миграции списка участников", async () => {
+    mocks.rpc.mockResolvedValue({ data: null, error: { code: "PGRST202" } });
+    const response = await GET(new Request(`http://localhost/api/projects/${projectId}/members`), {
+      params: Promise.resolve({ projectId }),
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      error: { message: "Список участников ещё не настроен. Примените миграцию 00006_manage_project_members.sql." },
     });
   });
 });
